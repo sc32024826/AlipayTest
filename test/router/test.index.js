@@ -1,5 +1,12 @@
-var chai = require('chai')
-var expect = chai.expect
-var my = require('../../routes/index.js')
+var request = require('supertest')
+var my = require('../../controller/index.js')
+var should = require('should')
 
-describe("")
+describe("i don't know what to weite ",()=>{
+    it("test pay function",(done)=>{
+        request.get('/pay')
+        (typeof ).should
+        
+    })
+}
+)
