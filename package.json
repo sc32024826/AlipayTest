@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "alipay-sdk": "^3.0.8",
+    "axios": "^0.19.0",
     "chai": "^4.2.0",
+    "crypto": "^1.0.1",
     "debug": "^4.1.1",
     "json": "^9.0.6",
     "koa": "^2.7.0",
@@ -23,6 +25,7 @@
     "koa-static": "^5.0.0",
     "koa-views": "^6.2.0",
     "mocha": "^6.2.2",
+    "nodejs-base64": "^1.0.3",
     "pug": "^2.0.3",
     "should": "^13.2.3",
     "supertest": "^4.0.2"
