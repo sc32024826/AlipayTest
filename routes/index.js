@@ -7,6 +7,9 @@ router.post('/paycallback', controller.payback)
 router.get('/success', controller.success)
 
 //快递查询模块
-router.get('/search', express.getOrderTracesByJson)
+router.get('/expressSearch', express.getOrderTracesByJson)
+
+//填写物流信息
+router.get('/expressInput',express.expressInfoInput)
 
 module.exports = router

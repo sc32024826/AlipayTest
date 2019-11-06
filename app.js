@@ -1,3 +1,9 @@
+const mongoose = require('mongoose')
+mongoose.Promise = require('bluebird')
+mongoose.connect('mongodb://localhost:27017/local', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
 const Koa = require('koa')
 const app = new Koa()
 const views = require('koa-views')
