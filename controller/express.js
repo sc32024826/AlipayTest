@@ -1,7 +1,6 @@
 const axios = require('axios');
 const crypto = require('crypto');
 const querystring = require('querystring')
-// const mongoose = require('mongoose')
 const express = require('../models/express')
 
 const AppKey = '7041910f-beb5-4c60-b785-f2496a6dba6d';
@@ -142,37 +141,34 @@ async function expressInfoInput(order, logistic) {
 
 
 }
-// getOrderByJson({
-//     ShipperCode: 'ZTO',
-//     LogisticCode: '3100707578976'
-// })
-TODO: 方法还未验证
 /**
  * 在快递鸟配置的回调地址的方法,用于接收回调 物流信息更新数据库
- * 
+ * 请求方式POST,"Content-Type": "application/json;charset=utf-8"
  */
-async function callBack(data) {
+async function callBack(ctx) {
     //根据快递鸟返回的物流信息物流单号,更新数据库
-    let num = data.LogisticCode;
+    //首先获取POST的数据
+    let post_params = ctx.request.body
+    // console.log(post_params);
+    // console.log(typeof post_params);
+    // 获取物流单号轨迹的数组
+    let data = post_params.Data
+    // console.log(post_params);
 
-    await express.findOne({ LogisticCode: num }, (err, doc) => {
-        //查询失败,说明该物流还未保存过,直接保存快递鸟回调数据
-        if (err) {
-
-            express.create(data, (error, doc) => {
-                if (error) {
-                    throw error;
-                }
-            })
-
-        } else {  //反之存在,则更新
-            express.updateOne({ LogisticCode: num }, (e, doc) => {
-                if (e) {
-                    throw e;
-                }
-            })
-        }
-    })
+    await data.forEach(element => {
+        let num = element.LogisticCode
+        // console.log(element.Traces);
+        let newTraces = element.Traces;
+        // return
+        //根据物流单号 查询数据库 并修改相应的轨迹信息
+        //如果物流单号不存在 则不更新
+        express.updateOne({ LogisticCode: num }, { Traces: newTraces }, (err, raw) => {
+            if (err) {
+                throw err;
+            }
+            // console.log(raw);
+        })
+    });
 
     let res = {
         'EBusinessID': EBusinessID,

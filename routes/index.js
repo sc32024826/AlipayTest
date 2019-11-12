@@ -10,6 +10,7 @@ router.get('/success', controller.success)
 //快递查询模块
 // router.get('/expressSearch', express.getOrderInfoByJson)
 router.get('/expressSearch', search.search)
+router.post('/expressSearch', search.search)
 //订阅
 // router.get('/getExpressTrace',express.subscribe)
 
@@ -17,6 +18,6 @@ router.get('/expressSearch', search.search)
 // router.get('/expressInput',express.expressInfoInput)
 
 //物流回调地址
-router.get('/callBack', express.callBack)
+router.post('/callBack', express.callBack)
 
 module.exports = router
