@@ -21,20 +21,7 @@ const EBusinessID = 'test1536407';   //测试
  * @returns data.success true-有轨迹 false-无轨迹
  */
 async function getOrderByJson(jsonobj) {
-    //即时查询只支持三家公司
-    const company = [
-        'YTO',
-        'STO',
-        'ZTO'
-    ]
 
-    let { ShipperCode, LogisticCode } = jsonobj;
-    if (!company.includes(ShipperCode)) {
-        throw ('400,即时查询只支持三家公司 圆通YTO 申通STO 中通ZTO');
-    }
-    if (!ShipperCode || !LogisticCode) {
-        throw ('400,缺少必要参数');
-    }
     let requestData = JSON.stringify(jsonobj);
     let DataSign = encrypt(requestData, AppKey);
     // console.log("签名" + DataSign);
@@ -46,7 +33,7 @@ async function getOrderByJson(jsonobj) {
             DataSign,
             DataType: '2'
         }
-    )
+    );
     // console.log("post数据" + PostData);
     const res = await axios({
         headers: {
@@ -79,34 +66,29 @@ function encrypt(data, appkey) {
  * @returns 返回订阅的结果 boolean
  */
 async function subscribe(obj) {
-    //请求必须参数验证
-    let { ShipperCode, LogisticCode, Sender, Receiver, Commodity } = obj;
-    //订阅只支持 圆通 中通 申通 百世汇通 四家快递公司
-    const company = [
-        'YTO',
-        'HTKY',
-        'STO',
-        'ZTO'
-    ]
+    console.log(obj);
 
-    if (!company.includes(ShipperCode)) {
-        throw ("400,订阅失败,您输入的快递公司无法订阅!订阅目前只支持 '圆通' '中通' '申通' '百世汇通' 四家快递公司!");
-    }
-    if (!ShipperCode || !LogisticCode) {
-        throw ('400,缺少必要参数');
-    }
+    //请求必须参数验证
+    let { Sender, Receiver } = obj;
+
     if (!Sender.Name || !Sender.CityName || !Sender.Address || !Sender.ProvinceName || !Sender.ExpAreaName || !Sender.Mobile) {
-        throw ('400,缺少必要参数');
+        console.log("Sender.Name" + Sender.Name)
+        console.log("Sender.CityName" + Sender.CityName)
+        console.log("Sender.Address" + Sender.Address)
+        console.log("Sender.ProvinceName" + Sender.ProvinceName)
+        console.log("Sender.ExpAreaName" + Sender.ExpAreaName)
+        console.log("Sender.Mobile" + Sender.Mobile)
+        throw ('400,缺少必要参数 99');
     }
     if (!Receiver.Name || !Receiver.CityName || !Receiver.Address || !Receiver.ProvinceName || !Receiver.ExpAreaName || !Receiver.Mobile) {
-        throw ('400,缺少必要参数');
+        throw ('400,缺少必要参数 102');
     }
 
-    Logistic = Object.assign({ PayType: 1 }, Logistic);
+    obj = Object.assign({ PayType: 1 }, obj);
 
-    console.log(Logistic);
+    console.log(obj);
 
-    let requestData = JSON.stringify(Logistic);
+    let requestData = JSON.stringify(obj);
     let DataSign = encrypt(requestData, AppKey);
     // console.log("签名" + DataSign);
     let PostData = querystring.stringify(
@@ -139,12 +121,12 @@ async function subscribe(obj) {
  * @param order json 订单信息: 商品信息R等
  * @param logistic json 物流信息:由前台输入物流单号R,快递公司R,收件人信息R,发件人信息R,等
  */
-async function expressInfoInput(order, logistic) {
-    const { } = order;
-    const { } = logistic;
+// async function expressInfoInput(order, logistic) {
+//     const { } = order;
+//     const { } = logistic;
 
 
-}
+// }
 /**
  * 在快递鸟配置的回调地址的方法,用于接收回调 物流信息更新数据库
  * 请求方式POST,"Content-Type": "application/json;charset=utf-8"
@@ -189,6 +171,5 @@ async function callBack(ctx) {
 module.exports = {
     getOrderByJson,
     subscribe,
-    expressInfoInput,
     callBack
 };
