@@ -2,20 +2,13 @@ const M_express = require('../models/express')
 const express = require('./express')
 
 /**
- * @param json 需要至少携带4个参数
- * ShipperCode:快递公司编码
- * LogisticCode:快递单号
- * Sender 寄件人对象,子参数 Name,Mobile,ProvinceName,CityName,ExpAreaName,Address
- * Receiver 收件人对象 子参数同上
- * @return 返回对象为 轨迹数组
+ * 首先 通过ctx 获取 请求参数,查询数据库是否存在物流的相应轨迹信息,若不存在,则订阅
+ * @param {*} ctx 由于使用次数限制,应当包含收寄人详细信息
  */
 async function search(ctx) {
     //GET 还是 POST
-    console.log(ctx.method)
     if (ctx.method === 'GET') {
-        var req = ctx.query
-        console.log(req);
-
+        var req = ctx.query;
     } else if (ctx.method === 'POST') {
         var req = ctx.request.body
     }
@@ -23,56 +16,81 @@ async function search(ctx) {
     if (!ShipperCode || !LogisticCode) {
         throw new Error("1.参数错误");
     }
-
+    console.info("ShipperCode:" + ShipperCode);
+    console.info("LogisticCode:" + LogisticCode);
     //查找数据库中是否存在该物流单号
-    await M_express.findOne({ LogisticCode: LogisticCode }, { Traces: 1 }, (error, doc) => {
+    await M_express.findOne({ 'ShipperCode': ShipperCode, 'LogisticCode': LogisticCode }, { 'Traces': 1 }, (error, doc) => {
+
         if (error) {
-            console.log("未订阅");
-            
-            //如果查询失败,说明当前数据库中不存在物流信息 ,需要订阅
-            //先查询即时物流
-            let result = express.getOrderByJson({
-                ShipperCode,
-                LogisticCode
-            });
-            // console.log(result);
-            //存储查询结果
-            M_express.create(result, (err, document) => {
-                if (err) {
-                    console.log("保存失败");
-                    throw err;
-                } else {
-                    console.log("保存成功");
-                    console.log(document);
-                }
-            })
-
-            //再订阅
-            try {
-                console.log("订阅");
-                
-                express.subscribe(json)
-            } catch (err) {
-                throw err
-            }
-            console.log(result);
-
-            return result
-        } else {
-            console.log("已经订阅,直接返回当前轨迹");
-            
+            findAndOrder(ShipperCode, LogisticCode, ctx)
+        } else if (doc) {
+            console.info("已经订阅,直接返回当前轨迹");
             //已经订阅,直接返回数据库中的轨迹 目前返回类型为 数组
-            // let res = JSON.stringify(doc._doc.Traces)
-            // console.log(res)
-            // return doc._doc.Traces
             ctx.body = {
                 list: doc._doc.Traces
             }
+        } else {
+            console.info('没有报错也没有搜索到数据');
+
+            findAndOrder(ShipperCode, LogisticCode, ctx)
         }
     })
 
 }
+/**
+ * 未在数据库中发现相应记录,请求查询并订阅该物流号的轨迹信息
+ * tips:不到为什么 使用findone查找时会遇到 回调参数 err和doc 同时为null这种情况
+ * @param {String} ShipperCode 
+ * @param {String} LogisticCode 
+ * @param {*} ctx 
+ */
+async function findAndOrder(ShipperCode, LogisticCode, ctx) {
+    console.info("查询失败");
 
+    //如果查询失败,说明当前数据库中不存在物流信息 ,需要订阅
+    //先查询即时物流
+    let result = await express.getOrderByJson({
+        ShipperCode,
+        LogisticCode
+    });
+    //存储查询结果
+    await M_express.create(result, (err, document) => {
+        if (err) {
+            console.info("保存失败");
+            throw err;
+        } else {
+            console.info("保存成功");
+            console.info(document);
+        }
+    })
+    //再订阅
+    try {
+        console.info("订阅");
+
+        let bool = express.subscribe(ctx.query)
+        if (bool) {
+            console.log('订阅成功');
+        } else {
+            console.log('订阅失败')
+        }
+
+    } catch (err) {
+        throw err
+    }
+    console.info(result);
+
+    ctx.body = {
+        'res': result,
+        'bool': bool
+    }
+}
+/**
+ * 显示单号余量
+ */
+async function remaining() {
+
+}
 module.exports = {
-    search
+    search,
+    remaining
 }

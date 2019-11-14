@@ -2,6 +2,7 @@ const axios = require('axios');
 const crypto = require('crypto');
 const querystring = require('querystring')
 const express = require('../models/express')
+const moment = require('moment')
 
 const AppKey = '7041910f-beb5-4c60-b785-f2496a6dba6d';
 const ReqURL = 'http://sandboxapi.kdniao.com:8080/kdniaosandbox/gateway/exterfaceInvoke.json';
@@ -153,30 +154,33 @@ async function callBack(ctx) {
     // console.log(typeof post_params);
     // 获取物流单号轨迹的数组
     let data = post_params.Data
-    // console.log(post_params);
+    // console.log(post_params.Data);
 
     await data.forEach(element => {
-        let num = element.LogisticCode
-        // console.log(element.Traces);
-        let newTraces = element.Traces;
-        // return
+        let { LogisticCode, ShipperCode, Traces } = element;
+
         //根据物流单号 查询数据库 并修改相应的轨迹信息
         //如果物流单号不存在 则不更新
-        express.updateOne({ LogisticCode: num }, { Traces: newTraces }, (err, raw) => {
-            if (err) {
-                throw err;
+        express.updateOne({ 'LogisticCode': LogisticCode, 'ShipperCode': ShipperCode }, { 'Traces': Traces }, (e, raw) => {
+            if (e) {
+                console.log("更新失败:" + e);
+                throw e;
+            } else {
+                console.log("更新成功" + raw);
             }
-            // console.log(raw);
+
         })
     });
 
     let res = {
         'EBusinessID': EBusinessID,
-        'UpdateTime': Data.now().toString(),
+        'UpdateTime': moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
         'Success': true,
         'Reason': ''
     }
-    return res
+    ctx.body = {
+        'res': res
+    }
 
 
 }
