@@ -10,10 +10,11 @@ const app = new Koa()
 const json = require('koa-json')
 const bodyparser = require('koa-bodyparser')
 const index = require('./routes/index')
-// const cors = require('cors')
 const onerror = require('koa-onerror')
 const logger = require('koa-logger')
+
 onerror(app)
+
 // middlewares
 app.use(logger())
 app.use(bodyparser({

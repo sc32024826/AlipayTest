@@ -23,6 +23,7 @@ async function search(ctx) {
 
         if (error) {
             findAndOrder(ShipperCode, LogisticCode, ctx)
+
         } else if (doc) {
             console.info("已经订阅,直接返回当前轨迹");
             //已经订阅,直接返回数据库中的轨迹 目前返回类型为 数组
@@ -35,8 +36,8 @@ async function search(ctx) {
             findAndOrder(ShipperCode, LogisticCode, ctx)
         }
     })
-
 }
+
 /**
  * 未在数据库中发现相应记录,请求查询并订阅该物流号的轨迹信息
  * tips:不到为什么 使用findone查找时会遇到 回调参数 err和doc 同时为null这种情况
@@ -49,48 +50,48 @@ async function findAndOrder(ShipperCode, LogisticCode, ctx) {
 
     //如果查询失败,说明当前数据库中不存在物流信息 ,需要订阅
     //先查询即时物流
-    let result = await express.getOrderByJson({
-        ShipperCode,
-        LogisticCode
-    });
+    try {
+        var result = await express.getOrderByJson({
+            ShipperCode,
+            LogisticCode
+        });
+    } catch (e) {
+        console.log("查询物流单号时出错:" + e);
+        ctx.body = e;
+        return
+    }
+
     //存储查询结果
     await M_express.create(result, (err, document) => {
         if (err) {
-            console.info("保存失败");
+            console.log("保存失败");
             throw err;
         } else {
-            console.info("保存成功");
-            console.info(document);
+            console.log("保存成功");
+            console.log(document);
         }
     })
     //再订阅
     try {
         console.info("订阅");
-
         let bool = express.subscribe(ctx.query)
         if (bool) {
             console.log('订阅成功');
         } else {
             console.log('订阅失败')
         }
-
     } catch (err) {
-        throw err
+        ctx.body = err;
+        return
     }
-    console.info(result);
+    // console.log(result);
 
     ctx.body = {
         'res': result,
         'bool': bool
     }
 }
-/**
- * 显示单号余量
- */
-async function remaining() {
 
-}
 module.exports = {
-    search,
-    remaining
+    search
 }

@@ -4,12 +4,12 @@ const querystring = require('querystring')
 const express = require('../models/express')
 const moment = require('moment')
 
-// const AppKey = '7041910f-beb5-4c60-b785-f2496a6dba6d';   沙箱
-// const ReqURL = 'http://sandboxapi.kdniao.com:8080/kdniaosandbox/gateway/exterfaceInvoke.json';  //沙箱
-// const EBusinessID = 'test1536407';   //测试
-const AppKey = '54ae50cc-6251-426f-a415-8880f9f1defa';      //正式
-const ReqURL = 'http://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx'; //正式
-const EBusinessID = '1536407';  //正式
+const AppKey = '7041910f-beb5-4c60-b785-f2496a6dba6d';   //沙箱
+const ReqURL = 'http://sandboxapi.kdniao.com:8080/kdniaosandbox/gateway/exterfaceInvoke.json';  //沙箱
+const EBusinessID = 'test1536407';   //测试
+// const AppKey = '54ae50cc-6251-426f-a415-8880f9f1defa';      //正式
+// const ReqURL = 'http://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx'; //正式
+// const EBusinessID = '1536407';  //正式
 
 /**
  * 即时查询
@@ -30,10 +30,10 @@ async function getOrderByJson(jsonobj) {
 
     let { ShipperCode, LogisticCode } = jsonobj;
     if (!company.includes(ShipperCode)) {
-        throw new Error('即时查询只支持三家公司 圆通YTO 申通STO 中通ZTO');
+        throw ('400,即时查询只支持三家公司 圆通YTO 申通STO 中通ZTO');
     }
     if (!ShipperCode || !LogisticCode) {
-        throw new Error('缺少必要参数');
+        throw ('400,缺少必要参数');
     }
     let requestData = JSON.stringify(jsonobj);
     let DataSign = encrypt(requestData, AppKey);
@@ -90,16 +90,16 @@ async function subscribe(obj) {
     ]
 
     if (!company.includes(ShipperCode)) {
-        throw new Error("订阅失败,您输入的快递公司无法订阅!订阅目前只支持 '圆通' '中通' '申通' '百世汇通' 四家快递公司!");
+        throw ("400,订阅失败,您输入的快递公司无法订阅!订阅目前只支持 '圆通' '中通' '申通' '百世汇通' 四家快递公司!");
     }
     if (!ShipperCode || !LogisticCode) {
-        throw new Error('缺少必要参数');
+        throw ('400,缺少必要参数');
     }
     if (!Sender.Name || !Sender.CityName || !Sender.Address || !Sender.ProvinceName || !Sender.ExpAreaName || !Sender.Mobile) {
-        throw new Error('缺少必要参数');
+        throw ('400,缺少必要参数');
     }
     if (!Receiver.Name || !Receiver.CityName || !Receiver.Address || !Receiver.ProvinceName || !Receiver.ExpAreaName || !Receiver.Mobile) {
-        throw new Error('缺少必要参数');
+        throw ('400,缺少必要参数');
     }
 
     Logistic = Object.assign({ PayType: 1 }, Logistic);
@@ -159,6 +159,15 @@ async function callBack(ctx) {
     let data = post_params.Data
     // console.log(post_params.Data);
 
+    let res = {
+        'EBusinessID': EBusinessID,
+        'UpdateTime': moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
+        'Success': true,
+        'Reason': ''
+    }
+    ctx.body = {
+        'res': res
+    }
     await data.forEach(element => {
         let { LogisticCode, ShipperCode, Traces } = element;
 
@@ -174,16 +183,6 @@ async function callBack(ctx) {
 
         })
     });
-
-    let res = {
-        'EBusinessID': EBusinessID,
-        'UpdateTime': moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
-        'Success': true,
-        'Reason': ''
-    }
-    ctx.body = {
-        'res': res
-    }
 
 
 }
