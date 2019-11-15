@@ -3,13 +3,15 @@ const crypto = require('crypto');
 const querystring = require('querystring')
 const express = require('../models/express')
 const moment = require('moment')
+//沙箱测试
+// const AppKey = '7041910f-beb5-4c60-b785-f2496a6dba6d';   
+// const ReqURL = 'http://sandboxapi.kdniao.com:8080/kdniaosandbox/gateway/exterfaceInvoke.json';  
+// const EBusinessID = 'test1536407';   
 
-const AppKey = '7041910f-beb5-4c60-b785-f2496a6dba6d';   //沙箱
-const ReqURL = 'http://sandboxapi.kdniao.com:8080/kdniaosandbox/gateway/exterfaceInvoke.json';  //沙箱
-const EBusinessID = 'test1536407';   //测试
-// const AppKey = '54ae50cc-6251-426f-a415-8880f9f1defa';      //正式
-// const ReqURL = 'http://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx'; //正式
-// const EBusinessID = '1536407';  //正式
+//正式
+const AppKey = '54ae50cc-6251-426f-a415-8880f9f1defa';      
+const ReqURL = 'http://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx'; 
+const EBusinessID = '1536407';  
 
 /**
  * 即时查询
@@ -66,18 +68,11 @@ function encrypt(data, appkey) {
  * @returns 返回订阅的结果 boolean
  */
 async function subscribe(obj) {
-    console.log(obj);
 
     //请求必须参数验证
     let { Sender, Receiver } = obj;
 
     if (!Sender.Name || !Sender.CityName || !Sender.Address || !Sender.ProvinceName || !Sender.ExpAreaName || !Sender.Mobile) {
-        console.log("Sender.Name" + Sender.Name)
-        console.log("Sender.CityName" + Sender.CityName)
-        console.log("Sender.Address" + Sender.Address)
-        console.log("Sender.ProvinceName" + Sender.ProvinceName)
-        console.log("Sender.ExpAreaName" + Sender.ExpAreaName)
-        console.log("Sender.Mobile" + Sender.Mobile)
         throw ('400,缺少必要参数 99');
     }
     if (!Receiver.Name || !Receiver.CityName || !Receiver.Address || !Receiver.ProvinceName || !Receiver.ExpAreaName || !Receiver.Mobile) {
@@ -85,8 +80,6 @@ async function subscribe(obj) {
     }
 
     obj = Object.assign({ PayType: 1 }, obj);
-
-    console.log(obj);
 
     let requestData = JSON.stringify(obj);
     let DataSign = encrypt(requestData, AppKey);
