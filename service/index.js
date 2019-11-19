@@ -1,33 +1,52 @@
 const Model = require('../models/express');
 
 /**
- *
+ * 查询数据库中的物流轨迹信息
  * @param ShipperCode
  * @param LogisticCode
  * @returns {Promise<void>}
  */
 async function find(ShipperCode, LogisticCode) {
     //查找数据库中是否存在该物流单号
-    await Model.findOne({ShipperCode: ShipperCode, LogisticCode: LogisticCode}, {Traces: 1},
-        async (e, doc) => {
-            return {
-                err: e,
-                doc: doc
-            }
-        })
+    let result = await Model.findOne({ShipperCode: ShipperCode, LogisticCode: LogisticCode}, {Traces: 1, State: 1});
+    if (result) {
+        // console.log(result);
+        return result
+    } else {
+        throw ("查询不到相应结果")
+    }
 }
 
 /**
- * 
- * @param data
+ * 保存查询结果
+ * @param {Object}data  快递鸟查询的结果
  * @returns {Promise<void>}
  */
-async function save(data){
+async function save(data) {
     //存储查询结果
     await Model.create(data, (err, document) => {
         return !!document;
     });
 }
-module.exports = {
-    find
+
+/**
+ * 更新轨迹信息
+ * @param element
+ * @returns {Promise<void>}
+ */
+async function update(element) {
+    let {LogisticCode, ShipperCode, Traces} = element;
+    let res = await Model.updateOne({LogisticCode: LogisticCode, ShipperCode: ShipperCode},
+        {Traces: Traces});
+    if (res) {
+        return res
+    }else{
+        throw "更新失败"
+    }
 }
+
+module.exports = {
+    find,
+    save,
+    update
+};

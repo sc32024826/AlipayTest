@@ -1,12 +1,12 @@
 const router = require('koa-router')();
 const express = require('../controller/express');
-const search = require('../controller/search.js');
+const ctrl = require('../controller/index');
 
 
 //快递查询模块
-router.post('/expressSearch', search.search);
+router.post('/expressSearch', ctrl.search);
 //订阅
-router.get('/sub',express.subscribe);
+router.post('/sub',ctrl.sub);
 
 //物流回调地址
 router.post('/callBack', express.callBack);

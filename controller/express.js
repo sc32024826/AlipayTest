@@ -1,10 +1,10 @@
 const axios = require("axios");
 const crypto = require("crypto");
 const querystring = require("querystring");
-const express = require("../models/express");
 const moment = require("moment");
 const config = require("../config/kuaidiniao");
-const { AppKey, ReqURL, EBusinessID } = config;
+const {AppKey, ReqURL, EBusinessID} = config;
+const service = require('../service/index');
 
 /**
  * 即时查询
@@ -16,32 +16,32 @@ const { AppKey, ReqURL, EBusinessID } = config;
  * @returns data.success true-有轨迹 false-无轨迹
  */
 async function getOrderByJson(jsonObj) {
-  let requestData = JSON.stringify(jsonObj);
-  let DataSign = encrypt(requestData, AppKey);
-  // console.log("签名" + DataSign);
-  let PostData = querystring.stringify({
-    RequestData: requestData,
-    EBusinessID,
-    RequestType: 1002,
-    DataSign,
-    DataType: "2"
-  });
-  // console.log("post数据" + PostData);
-  const res = await axios({
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
-    },
-    method: "POST",
-    url: ReqURL,
-    data: PostData
-  }).catch(err => {
-    console.log("err:", err);
-    throw err;
-  });
+    let requestData = JSON.stringify(jsonObj);
+    let DataSign = encrypt(requestData, AppKey);
+    // console.log("签名" + DataSign);
+    let PostData = querystring.stringify({
+        RequestData: requestData,
+        EBusinessID,
+        RequestType: 1002,
+        DataSign,
+        DataType: "2"
+    });
+    // console.log("post数据" + PostData);
+    const res = await axios({
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+        },
+        method: "POST",
+        url: ReqURL,
+        data: PostData
+    }).catch(err => {
+        console.log("err:", err);
+        throw err;
+    });
 
-  // console.log(res.data);
+    // console.log(res.data);
 
-  return res.data;
+    return res.data;
 }
 
 /**
@@ -51,10 +51,10 @@ async function getOrderByJson(jsonObj) {
  * @return string
  */
 function encrypt(data, AppKey) {
-  let md5 = crypto.createHash("md5");
-  return Buffer.from(md5.update(data + AppKey).digest("hex")).toString(
-    "base64"
-  );
+    let md5 = crypto.createHash("md5");
+    return Buffer.from(md5.update(data + AppKey).digest("hex")).toString(
+        "base64"
+    );
 }
 
 /**
@@ -62,56 +62,33 @@ function encrypt(data, AppKey) {
  * @returns 返回订阅的结果 boolean
  */
 async function subscribe(obj) {
-  //请求必须参数验证
-  let { Sender, Receiver } = obj;
 
-  if (
-    !Sender.Name ||
-    !Sender.CityName ||
-    !Sender.Address ||
-    !Sender.ProvinceName ||
-    !Sender.ExpAreaName ||
-    !Sender.Mobile
-  ) {
-    throw "400,缺少必要参数 99";
-  }
-  if (
-    !Receiver.Name ||
-    !Receiver.CityName ||
-    !Receiver.Address ||
-    !Receiver.ProvinceName ||
-    !Receiver.ExpAreaName ||
-    !Receiver.Mobile
-  ) {
-    throw "400,缺少必要参数 102";
-  }
+    obj = Object.assign({PayType: 1}, obj);
 
-  obj = Object.assign({ PayType: 1 }, obj);
-
-  let requestData = JSON.stringify(obj);
-  let DataSign = encrypt(requestData, AppKey);
-  // console.log("签名" + DataSign);
-  let PostData = querystring.stringify({
-    RequestData: requestData,
-    EBusinessID,
-    RequestType: 1008,
-    DataSign,
-    DataType: "2"
-  });
-  // console.log("post数据" + PostData);
-  const res = await axios({
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
-    },
-    method: "POST",
-    url: ReqURL,
-    data: PostData
-  }).catch(err => {
-    console.log("err:", err);
-    throw err;
-  });
-  console.log(res.data);
-  return res.data.Success; //返回订阅结果
+    let requestData = JSON.stringify(obj);
+    let DataSign = encrypt(requestData, AppKey);
+    // console.log("签名" + DataSign);
+    let PostData = querystring.stringify({
+        RequestData: requestData,
+        EBusinessID,
+        RequestType: 1008,
+        DataSign,
+        DataType: "2"
+    });
+    // console.log("post数据" + PostData);
+    const res = await axios({
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+        },
+        method: "POST",
+        url: ReqURL,
+        data: PostData
+    }).catch(err => {
+        console.log("err:", err);
+        throw err;
+    });
+    console.log(res.data);
+    return res.data.Success; //返回订阅结果
 }
 
 /**
@@ -119,45 +96,37 @@ async function subscribe(obj) {
  * 请求方式POST,"Content-Type": "application/json;charset=utf-8"
  */
 async function callBack(ctx) {
-  //根据快递鸟返回的物流信息物流单号,更新数据库
-  //首先获取POST的数据
-  let post_params = ctx.request.body;
-  // console.log(post_params);
-  // console.log(typeof post_params);
-  // 获取物流单号轨迹的数组
-  let data = post_params.Data;
-  // console.log(post_params.Data);
+    //根据快递鸟返回的物流信息物流单号,更新数据库
+    //首先获取POST的数据
+    let post_params = ctx.request.body;
+    // console.log(post_params);
+    // console.log(typeof post_params);
+    // 获取物流单号轨迹的数组
+    let data = post_params.Data;
+    // console.log(post_params.Data);
 
-  let res = {
-    EBusinessID: EBusinessID,
-    UpdateTime: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
-    Success: true,
-    Reason: ""
-  };
-  ctx.body = {
-    res: res
-  };
-  await data.forEach(element => {
-    let { LogisticCode, ShipperCode, Traces } = element;
-    //根据物流单号 查询数据库 并修改相应的轨迹信息
-    //如果物流单号不存在 则不更新
-    express.updateOne(
-      { LogisticCode: LogisticCode, ShipperCode: ShipperCode },
-      { Traces: Traces },
-      (e, raw) => {
-        if (e) {
-          console.log("更新失败:" + e);
-          throw e;
-        } else {
-          console.log("更新成功" + raw);
+    let res = {
+        EBusinessID: EBusinessID,
+        UpdateTime: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
+        Success: true,
+        Reason: ""
+    };
+    ctx.body = {
+        res: res
+    };
+    await data.forEach(element => {
+        //根据物流单号 查询数据库 并修改相应的轨迹信息
+        //如果物流单号不存在 则不更新
+        try{
+            service.update(element)
+        }catch (e) {
+            console.log(e)
         }
-      }
-    );
-  });
+    });
 }
 
 module.exports = {
-  getOrderByJson,
-  subscribe,
-  callBack
+    getOrderByJson,
+    subscribe,
+    callBack
 };
