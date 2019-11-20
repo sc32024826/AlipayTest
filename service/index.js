@@ -2,13 +2,14 @@ const Model = require('../models/express');
 
 /**
  * 查询数据库中的物流轨迹信息
- * @param ShipperCode
- * @param LogisticCode
+ * @param ShipperCode {String}  查询条件
+ * @param LogisticCode {String} 查询条件
+ * @param mapping {Object} 过滤内容
  * @returns {Promise<void>}
  */
-async function find(ShipperCode, LogisticCode) {
+async function find(ShipperCode, LogisticCode, mapping) {
     //查找数据库中是否存在该物流单号
-    let result = await Model.findOne({ShipperCode: ShipperCode, LogisticCode: LogisticCode}, {Traces: 1, State: 1});
+    let result = await Model.findOne({ ShipperCode: ShipperCode, LogisticCode: LogisticCode }, mapping);
     if (result) {
         // console.log(result);
         return result
@@ -35,12 +36,12 @@ async function save(data) {
  * @returns {Promise<void>}
  */
 async function update(element) {
-    let {LogisticCode, ShipperCode, Traces} = element;
-    let res = await Model.updateOne({LogisticCode: LogisticCode, ShipperCode: ShipperCode},
-        {Traces: Traces});
+    let { LogisticCode, ShipperCode, Traces } = element;
+    let res = await Model.updateOne({ LogisticCode: LogisticCode, ShipperCode: ShipperCode },
+        { Traces: Traces });
     if (res) {
         return res
-    }else{
+    } else {
         throw "更新失败"
     }
 }

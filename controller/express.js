@@ -4,7 +4,6 @@ const querystring = require("querystring");
 const moment = require("moment");
 const config = require("../config/kuaidiniao");
 const {AppKey, ReqURL, EBusinessID} = config;
-const service = require('../service/index');
 
 /**
  * 即时查询
@@ -12,8 +11,8 @@ const service = require('../service/index');
  * OrderCode 订单编号,不可重复,自定义
  * ShipperCode快递公司编码 即时查询只支持三家公司 圆通YTO 申通STO 中通ZTO
  * LogisticCode快递单号
- * @param jsonObj 必须参数:ShipperCode-快递公司编码,LogisticCode-快递单号
- * @returns data.success true-有轨迹 false-无轨迹
+ * @param jsonObj {Object} 必须参数:ShipperCode-快递公司编码,LogisticCode-快递单号
+ * @returns {Object} data.success true-有轨迹 false-无轨迹
  */
 async function getOrderByJson(jsonObj) {
     let requestData = JSON.stringify(jsonObj);
@@ -52,9 +51,7 @@ async function getOrderByJson(jsonObj) {
  */
 function encrypt(data, AppKey) {
     let md5 = crypto.createHash("md5");
-    return Buffer.from(md5.update(data + AppKey).digest("hex")).toString(
-        "base64"
-    );
+    return Buffer.from(md5.update(data + AppKey).digest("hex")).toString("base64");
 }
 
 /**
@@ -117,11 +114,8 @@ async function callBack(ctx) {
     await data.forEach(element => {
         //根据物流单号 查询数据库 并修改相应的轨迹信息
         //如果物流单号不存在 则不更新
-        try{
-            service.update(element)
-        }catch (e) {
-            console.log(e)
-        }
+        let { LogisticCode, ShipperCode, Traces } = element;
+        Model.updateOne({ LogisticCode: LogisticCode, ShipperCode: ShipperCode },{ Traces: Traces });
     });
 }
 

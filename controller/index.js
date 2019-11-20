@@ -1,5 +1,5 @@
 const express = require('./express');
-const service = require('../service/index');
+const Model = require('../models/express');
 
 /**
  * 首先 通过ctx 获取 请求参数,查询数据库是否存在物流的相应轨迹信息,若不存在,则订阅
@@ -8,7 +8,7 @@ const service = require('../service/index');
 async function search(ctx) {
 
     const req = ctx.request.body;
-    let {ShipperCode, LogisticCode} = req;
+    let { ShipperCode, LogisticCode } = req;
     //圆通 中通 申通 百世汇通 四家快递公司
     const company = ['YTO', 'STO', 'ZTO'];
 
@@ -31,7 +31,9 @@ async function search(ctx) {
     //首先根据物流单号和公司编号 查询数据库，是否存在相应内容
     try {
         //如果存在，则直接返回该单号的物流信息
-        let res = await service.find(ShipperCode, LogisticCode);
+        let res = await Model.findOne({ ShipperCode, LogisticCode }, { Traces: 1, State: 1 });
+        console.log(res);
+
         ctx.body = {
             List: res.Traces,
             Success: true,
@@ -58,7 +60,7 @@ async function search(ctx) {
         };
 
         //保存查询结果
-        await service.save(data)
+        await Model.create(data)
     }
 }
 
@@ -70,7 +72,7 @@ async function search(ctx) {
 async function sub(ctx) {
 
     //请求必须参数验证
-    let {ShipperCode, LogisticCode, State} = ctx.request.body;
+    let { ShipperCode, LogisticCode, State } = ctx.request.body;
     if (State === '3' || State === '4') {
         ctx.body = {
             Err: "该快递状态不支持订阅，已签收或者出错！",
@@ -78,6 +80,23 @@ async function sub(ctx) {
         };
         return
     }
+    //查询是否已经订阅,若数据库存在订阅信息 则直接返回成功
+    try {
+        let isSub = await Model.findOne({ ShipperCode: ShipperCode, LogisticCode: LogisticCode }, {})
+        console.log("查询数据库中是否存在订阅信息");
+        console.log(isSub);
+        if (isSub) {
+            ctx.body = {
+                Success: true,
+                Msg: "数据库中已经存在订阅信息,直接返回订阅成功的状态"
+            };
+            return
+        }
+    } catch (err) {
+        console.log(err);
+        //查询不到结果 说明未订阅
+    }
+
     //不想给快递鸟 收集个人信息，直接以虚假信息覆盖
     let privateInfo = {
         PayType: 1,
@@ -100,12 +119,31 @@ async function sub(ctx) {
             Address: "你家隔壁"
         }
     };
-
-    let req = Object.assign({ShipperCode, LogisticCode}, privateInfo);
+    // 覆盖收寄人信息
+    let req = Object.assign({ ShipperCode, LogisticCode }, privateInfo);
     try {
-        let res = await express.subscribe(req);
+        //开始订阅
+        var res = await express.subscribe(req);
+        // 返回订阅结果
         ctx.body = {
-            Success: res
+            Success: res,
+            Msg: "新订阅成功!"
+        }
+        console.log(res);
+
+        //存储订阅结果  更新 或者 新建
+        if (res) {
+            //订阅成功 更新数据库 
+            let update = await Model.updateOne({ ShipperCode, LogisticCode }, { Sub: res });
+            console.log(update);
+
+            // 如果没有查到相应条目 则新增
+            if (update.nModified === 0) {
+                console.log("订阅状态:" + res);
+
+                let saver = await Model.create({ ShipperCode: ShipperCode, LogisticCode: LogisticCode, Sub: res })
+                console.log(saver);
+            }
         }
     } catch (err) {
         console.log(err);
@@ -114,7 +152,6 @@ async function sub(ctx) {
             Success: false
         }
     }
-
 }
 
 module.exports = {
