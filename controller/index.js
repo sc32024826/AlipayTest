@@ -1,5 +1,14 @@
 const express = require('./express');
 const Model = require('../models/express');
+const config = require("../config/kuaidiniao");
+const { EBusinessID } = config;
+const moment = require("moment");
+const log4js = require('log4js')
+log4js.configure({
+    appenders: { cheese: { type: 'file', filename: '../log/cheese.log' } },
+    categories: { default: { appenders: ['cheese'], level: 'error' } }
+});
+const logger = log4js.getLogger('cheese')
 
 /**
  * 首先 通过ctx 获取 请求参数,查询数据库是否存在物流的相应轨迹信息,若不存在,则订阅
@@ -154,7 +163,46 @@ async function sub(ctx) {
     }
 }
 
+/**
+ * 在快递鸟配置的回调地址的方法,用于接收回调 物流信息更新数据库
+ * 请求方式POST,"Content-Type": "application/json;charset=utf-8"
+ */
+async function callBack(ctx) {
+
+    //根据快递鸟返回的物流信息物流单号,更新数据库
+    //首先获取POST的数据
+    let post_params = ctx.request.body.RequestData;
+
+    // 获取物流单号轨迹的数组
+    let data = JSON.parse(post_params).Data;
+
+    let res = {
+        EBusinessID: EBusinessID,
+        UpdateTime: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
+        Success: true,
+        Reason: ""
+    };
+    ctx.body = res;
+
+    await data.forEach(element => {
+        //根据物流单号 查询数据库 并修改相应的轨迹信息
+        //如果物流单号不存在 则不更新
+        let { LogisticCode, ShipperCode, Traces } = element;
+        Model.updateOne({ LogisticCode: LogisticCode, ShipperCode: ShipperCode }, { Traces: Traces }, async (err, raw) => {
+            if (err) {
+                console.log("update failed");
+
+            } else {
+                console.log("update success");
+
+            }
+        });
+
+    });
+}
+
 module.exports = {
     search,
-    sub
+    sub,
+    callBack
 };

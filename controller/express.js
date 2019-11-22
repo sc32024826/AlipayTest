@@ -1,9 +1,9 @@
 const axios = require("axios");
 const crypto = require("crypto");
 const querystring = require("querystring");
-const moment = require("moment");
 const config = require("../config/kuaidiniao");
-const {AppKey, ReqURL, EBusinessID} = config;
+const { AppKey, ReqURL, EBusinessID } = config;
+
 
 /**
  * 即时查询
@@ -60,7 +60,7 @@ function encrypt(data, AppKey) {
  */
 async function subscribe(obj) {
 
-    obj = Object.assign({PayType: 1}, obj);
+    obj = Object.assign({ PayType: 1 }, obj);
 
     let requestData = JSON.stringify(obj);
     let DataSign = encrypt(requestData, AppKey);
@@ -89,38 +89,52 @@ async function subscribe(obj) {
 }
 
 /**
- * 在快递鸟配置的回调地址的方法,用于接收回调 物流信息更新数据库
- * 请求方式POST,"Content-Type": "application/json;charset=utf-8"
+ * 
+ * @param {Object} ctx 
  */
-async function callBack(ctx) {
-    //根据快递鸟返回的物流信息物流单号,更新数据库
-    //首先获取POST的数据
-    let post_params = ctx.request.body;
-    // console.log(post_params);
-    // console.log(typeof post_params);
-    // 获取物流单号轨迹的数组
-    let data = post_params.Data;
-    // console.log(post_params.Data);
-
-    let res = {
-        EBusinessID: EBusinessID,
-        UpdateTime: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
-        Success: true,
-        Reason: ""
-    };
-    ctx.body = {
-        res: res
-    };
-    await data.forEach(element => {
-        //根据物流单号 查询数据库 并修改相应的轨迹信息
-        //如果物流单号不存在 则不更新
-        let { LogisticCode, ShipperCode, Traces } = element;
-        Model.updateOne({ LogisticCode: LogisticCode, ShipperCode: ShipperCode },{ Traces: Traces });
+async function TracesWatch(ctx) {
+    let requestData = JSON.stringify(ctx.request.body);
+    let DataSign = encrypt(requestData, AppKey);
+    // console.log("签名" + DataSign);
+    let PostData = querystring.stringify({
+        RequestData: requestData,
+        EBusinessID,
+        RequestType: 101,
+        DataSign,
+        DataType: "2"
     });
+    // console.log("post数据" + PostData);
+    console.log(PostData);
+
+    const res = await axios({
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+        },
+        method: "POST",
+        url: ReqURL,
+        data: PostData
+    }).catch(err => {
+        console.log("err:", err);
+
+        ctx.body = {
+            Msg: "出错",
+            Success: false
+        }
+        throw err;
+    });
+
+    if (res) {
+        console.log(res.request);
+        ctx.body = {
+            Msg: "成功",
+            Success: true
+        }
+
+    }
 }
 
 module.exports = {
     getOrderByJson,
     subscribe,
-    callBack
+    TracesWatch
 };
