@@ -18,6 +18,7 @@ async function search(ctx) {
 
     const req = ctx.request.body;
     let { ShipperCode, LogisticCode } = req;
+
     //圆通 中通 申通 百世汇通 四家快递公司
     const company = ['YTO', 'STO', 'ZTO'];
 
@@ -37,6 +38,7 @@ async function search(ctx) {
 
     console.log('ShipperCode:' + ShipperCode);
     console.log('LogisticCode:' + LogisticCode);
+
     //首先根据物流单号和公司编号 查询数据库，是否存在相应内容
     try {
         //如果存在，则直接返回该单号的物流信息
@@ -68,7 +70,7 @@ async function search(ctx) {
             List: data.Traces
         };
 
-        //保存查询结果
+        //保存查询结果 TODU: 增加错误时 记录日志
         await Model.create(data)
     }
 }
@@ -125,7 +127,7 @@ async function sub(ctx) {
             ProvinceName: "江苏省",
             CityName: "苏州市",
             ExpAreaName: "扬州区",
-            Address: "你家隔壁"
+            Address: "御龙湾"
         }
     };
     // 覆盖收寄人信息
@@ -200,6 +202,7 @@ async function callBack(ctx) {
 
     });
 }
+
 
 module.exports = {
     search,
