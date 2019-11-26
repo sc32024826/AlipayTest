@@ -92,7 +92,7 @@ async function sub(ctx) {
         return
     }
     //圆通 中通 申通 百世汇通 四家快递公司
-    const company = ['YTO', 'STO', 'ZTO','HTKY'];
+    const company = ['YTO', 'STO', 'ZTO', 'HTKY'];
 
     if (!company.includes(ShipperCode.toUpperCase())) {
         ctx.body = {
@@ -255,10 +255,17 @@ async function findWithSub(ctx) {
                 }
             } else {
                 console.log("存在记录 但是没订阅");
+                let State = res.State;
+
                 //订阅 并更新数据库
                 let req = await privacy.index(ShipperCode, LogisticCode);
                 //开始订阅
-                var result = await express.subscribe(req);
+                if (State != '3' && State != '4') {
+                    var result = await express.subscribe(req);
+                } else {
+
+                    console.log("该快递状态不支持订阅，已签收或者出错！");
+                }
 
                 //查询成功 返回相应的值
                 ctx.body = {
@@ -289,9 +296,15 @@ async function findWithSub(ctx) {
                 return
             });
             let req = await privacy.index(ShipperCode, LogisticCode);
+            let State = data.State;
             //开始订阅
-            var result = await express.subscribe(req);
+            if (State != '3' && State != '4') {
+                var result = await express.subscribe(req);
 
+            } else {
+
+                console.log("该快递状态不支持订阅，已签收或者出错！");
+            }
             //查询成功 返回相应的值
             ctx.body = {
                 Success: true,

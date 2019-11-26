@@ -4,7 +4,7 @@ const assert = require('assert')
 const request = require('supertest')
 const app = require('../app.js')
 
-describe("测试 express.js ", () => {
+describe("测试", () => {
 
     var server;
 
@@ -73,7 +73,7 @@ describe("测试 express.js ", () => {
         it('实时查询接口,数据库不存在数据', (done) => {
             let obj = {
                 ShipperCode: "YTO",
-                LogisticCode: "YT4231041584051"
+                LogisticCode: "004231041584051"
             };
             request(server)
                 .post('/expressSearch')
@@ -159,7 +159,7 @@ describe("测试 express.js ", () => {
         it('查询并订阅接口测试:存在记录 但是没订阅', (done) => {
             let obj = {
                 ShipperCode: "YTO",
-                LogisticCode: "YT4231041584051"
+                LogisticCode: "YT1"
             };
             request(server)
                 .post('/findWithSub')
@@ -176,8 +176,8 @@ describe("测试 express.js ", () => {
         });
         it('查询并订阅接口测试:不存在记录', (done) => {
             let obj = {
-                ShipperCode: "STO",
-                LogisticCode: "YT4231041583052"
+                ShipperCode: "YTO",
+                LogisticCode: "YT000"
             };
             request(server)
                 .post('/findWithSub')
