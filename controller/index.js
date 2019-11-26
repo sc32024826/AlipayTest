@@ -263,7 +263,7 @@ async function findWithSub(ctx) {
                 if (State != '3' && State != '4') {
                     var result = await express.subscribe(req);
                 } else {
-
+                    result = false;
                     console.log("该快递状态不支持订阅，已签收或者出错！");
                 }
 
@@ -302,7 +302,7 @@ async function findWithSub(ctx) {
                 var result = await express.subscribe(req);
 
             } else {
-
+                result = false;
                 console.log("该快递状态不支持订阅，已签收或者出错！");
             }
             //查询成功 返回相应的值
