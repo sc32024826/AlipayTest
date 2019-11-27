@@ -3,12 +3,6 @@ const Model = require('../models/express');
 const config = require("../config/kuaidiniao");
 const { EBusinessID } = config;
 const moment = require("moment");
-const log4js = require('log4js')
-log4js.configure({
-    appenders: { cheese: { type: 'file', filename: '../log/cheese.log' } },
-    categories: { default: { appenders: ['cheese'], level: 'error' } }
-});
-const logger = log4js.getLogger('cheese')
 const privacy = require('../utils/privacy')
 
 /**
@@ -22,7 +16,7 @@ async function search(ctx) {
 
     if (!ShipperCode || !LogisticCode) {
         ctx.body = {
-            err: "400, 参数错误"
+            Err: "400, 参数错误"
         };
         return
     }
@@ -31,7 +25,7 @@ async function search(ctx) {
 
     if (!company.includes(ShipperCode.toUpperCase())) {
         ctx.body = {
-            err: "目前只支持三家公司 圆通YTO 申通STO 中通ZTO"
+            Err: "目前只支持三家公司 圆通YTO 申通STO 中通ZTO"
         };
         return
     }
@@ -96,7 +90,7 @@ async function sub(ctx) {
 
     if (!company.includes(ShipperCode.toUpperCase())) {
         ctx.body = {
-            err: "目前只支持四家公司订阅 圆通YTO 申通STO 中通ZTO 百世汇通HTKY"
+            Err: "目前只支持四家公司订阅 圆通YTO 申通STO 中通ZTO 百世汇通HTKY"
         };
         return
     }
@@ -183,6 +177,10 @@ async function callBack(ctx) {
     //根据快递鸟返回的物流信息物流单号,更新数据库
     //首先获取POST的数据
     let post_params = ctx.request.body.RequestData;
+    console.log("----------");
+    console.log(ctx);
+
+    console.log(post_params);
 
     // 获取物流单号轨迹的数组
     let data = JSON.parse(post_params).Data;
@@ -199,7 +197,8 @@ async function callBack(ctx) {
         //根据物流单号 查询数据库 并修改相应的轨迹信息
         //如果物流单号不存在 则不更新
         let { LogisticCode, ShipperCode, Traces } = element;
-        Model.updateOne({ LogisticCode: LogisticCode, ShipperCode: ShipperCode }, { Traces: Traces }, async (err, raw) => {
+        let Reason = "数据更新";
+        Model.updateOne({ LogisticCode: LogisticCode, ShipperCode: ShipperCode }, { Traces: Traces, Reason: Reason }, async (err, raw) => {
             if (err) {
                 console.log("update failed");
 
@@ -220,7 +219,7 @@ async function findWithSub(ctx) {
     let { ShipperCode, LogisticCode } = req;
     if (!ShipperCode || !LogisticCode) {
         ctx.body = {
-            err: "400, 参数错误"
+            Err: "400, 参数错误"
         };
         return
     }
@@ -230,7 +229,7 @@ async function findWithSub(ctx) {
     if (!company.includes(ShipperCode.toUpperCase())) {
         // console.log('只支持三家公司 圆通YTO 申通STO 中通ZTO');
         ctx.body = {
-            err: "目前只支持三家公司 圆通YTO 申通STO 中通ZTO"
+            Err: "目前只支持三家公司 圆通YTO 申通STO 中通ZTO"
         };
         return
     }
