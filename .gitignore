@@ -5,7 +5,8 @@ AlipayDemo.iml
 misc.xml
 modules.xml
 vcs.xml
-/test/
 /util/
 /logs/
-.idea
+/.idea/
+/sc/
+/.nyc_output/
