@@ -241,7 +241,7 @@ describe("测试", () => {
                     console.log(err);
                     done()
                 } else {
-                    console.log(res.body);
+                    // console.log(res.body);
                     done()
                 }
             })

@@ -298,7 +298,6 @@ async function findWithSub(ctx) {
             //保存查询结果 错误时记录日志
             await Model.create(data).catch((e) => {
                 console.log("保存失败");
-
             })
         }
     } catch (e) {

@@ -86,53 +86,7 @@ async function subscribe(obj) {
     return res.data; //返回订阅结果
 }
 
-/**
- * 
- * @param {Object} ctx 
- */
-async function TracesWatch(ctx) {
-    let requestData = JSON.stringify(ctx.request.body);
-    let DataSign = encrypt(requestData, AppKey);
-    // console.log("签名" + DataSign);
-    let PostData = querystring.stringify({
-        RequestData: requestData,
-        EBusinessID,
-        RequestType: 101,
-        DataSign,
-        DataType: "2"
-    });
-    // console.log("post数据" + PostData);
-    console.log(PostData);
-
-    const res = await axios({
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
-        },
-        method: "POST",
-        url: ReqURL,
-        data: PostData
-    }).catch(err => {
-        console.log("err:", err);
-
-        ctx.body = {
-            Msg: "出错",
-            Success: false
-        }
-        throw err;
-    });
-
-    if (res) {
-        console.log(res.request);
-        ctx.body = {
-            Msg: "成功",
-            Success: true
-        }
-
-    }
-}
-
 module.exports = {
     getOrderByJson,
-    subscribe,
-    TracesWatch
+    subscribe
 };
