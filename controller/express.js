@@ -60,8 +60,6 @@ function encrypt(data, AppKey) {
  */
 async function subscribe(obj) {
 
-    obj = Object.assign({ PayType: 1 }, obj);
-
     let requestData = JSON.stringify(obj);
     let DataSign = encrypt(requestData, AppKey);
     // console.log("签名" + DataSign);
@@ -81,11 +79,11 @@ async function subscribe(obj) {
         url: ReqURL,
         data: PostData
     }).catch(err => {
-        console.log("err:", err);
+        console.log(err);
         throw err;
     });
     console.log(res.data);
-    return res.data.Success; //返回订阅结果
+    return res.data; //返回订阅结果
 }
 
 /**

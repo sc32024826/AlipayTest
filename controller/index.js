@@ -107,37 +107,44 @@ async function sub(ctx) {
             return
         }
     } catch (err) {
-        console.log("ctrl-indedx-106" + err);
+        console.log(err);
         //查询不到结果 说明未订阅
     }
 
-   let req = await privacy.index(ShipperCode, LogisticCode);
+    let req = await privacy.index(ShipperCode, LogisticCode);
     try {
         //开始订阅
         var res = await express.subscribe(req);
-        // 返回订阅结果
-        ctx.body = {
-            Success: res,
-            Msg: "新订阅成功!"
-        }
+
         // console.log(res);
 
         //存储订阅结果  更新 或者 新建
-        if (res) {
+        if (res.Success) {
+            // 返回订阅结果
+            ctx.body = {
+                Success: res.Success,
+                Msg: "新订阅成功!"
+            }
             //订阅成功 更新数据库 
-            let update = await Model.updateOne({ ShipperCode, LogisticCode }, { Sub: res });
+            let update = await Model.updateOne({ ShipperCode, LogisticCode }, { Sub: res.Success });
             // console.log(update);
 
             // 如果没有查到相应条目 则新增
             if (update.nModified === 0) {
-                console.log("订阅状态:" + res);
+                console.log("订阅状态:" + res.Success);
 
-                let saver = await Model.create({ ShipperCode: ShipperCode, LogisticCode: LogisticCode, Sub: res })
+                let saver = await Model.create({ ShipperCode: ShipperCode, LogisticCode: LogisticCode, Sub: res.Success })
                 console.log(saver);
+            }
+        } else {
+            ctx.body = {
+                Success: res.Success,
+                Msg: res.Reason
             }
         }
     } catch (err) {
-        console.log("ctrl-index-159" + err);
+        console.log(err);
+        
         ctx.body = {
             Err: err,
             Success: false
@@ -154,10 +161,6 @@ async function callBack(ctx) {
     //根据快递鸟返回的物流信息物流单号,更新数据库
     //首先获取POST的数据
     let post_params = ctx.request.body.RequestData;
-    console.log("----------");
-    console.log(ctx);
-
-    console.log(post_params);
 
     // 获取物流单号轨迹的数组
     let data = JSON.parse(post_params).Data;
@@ -239,7 +242,7 @@ async function findWithSub(ctx) {
                 if (State != '3' && State != '4') {
                     var result = await express.subscribe(req);
                 } else {
-                    result = false;
+                    result.Success = false;
                     console.log("该快递状态不支持订阅，已签收或者出错！");
                 }
 
@@ -248,11 +251,11 @@ async function findWithSub(ctx) {
                     Success: true,
                     State: res.State,
                     List: res.Traces,
-                    Sub: result
+                    Sub: result.Success
                 };
 
                 //更新数据库
-                let updateResult = await Model.updateOne({ ShipperCode, LogisticCode }, { Sub: result })
+                let updateResult = await Model.updateOne({ ShipperCode, LogisticCode }, { Sub: result.Success })
 
                 // console.log(updateResult);
 
@@ -278,7 +281,7 @@ async function findWithSub(ctx) {
                 var result = await express.subscribe(req);
 
             } else {
-                result = false;
+                result.Success = false;
                 console.log("该快递状态不支持订阅，已签收或者出错！");
             }
             //查询成功 返回相应的值
@@ -286,11 +289,11 @@ async function findWithSub(ctx) {
                 Success: true,
                 State: data.State,
                 List: data.Traces,
-                Sub: result
+                Sub: result.Success
             };
             // console.log(data);
 
-            data.Sub = result;
+            data.Sub = result.Success;
             // console.log(data);
             //保存查询结果 错误时记录日志
             await Model.create(data).catch((e) => {
