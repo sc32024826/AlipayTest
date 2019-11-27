@@ -267,7 +267,7 @@ async function findWithSub(ctx) {
                 ShipperCode,
                 LogisticCode
             }).catch((err) => {
-                console.log("ctrl-index-274" + err);
+                console.log(err);
                 ctx.body = {
                     Err: err,
                     Success: false
@@ -276,25 +276,25 @@ async function findWithSub(ctx) {
             });
             let req = await privacy.index(ShipperCode, LogisticCode);
             let State = data.State;
+
+            var result = false;
+
             //开始订阅
             if (State != '3' && State != '4') {
-                var result = await express.subscribe(req);
+                result = await express.subscribe(req).Success;
 
             } else {
-                result.Success = false;
                 console.log("该快递状态不支持订阅，已签收或者出错！");
             }
-            //查询成功 返回相应的值
+            //查询成功 返回相应的值        
             ctx.body = {
                 Success: true,
                 State: data.State,
                 List: data.Traces,
-                Sub: result.Success
+                Sub: result
             };
-            // console.log(data);
-
-            data.Sub = result.Success;
-            // console.log(data);
+            
+            data.Sub = result;
             //保存查询结果 错误时记录日志
             await Model.create(data).catch((e) => {
                 console.log("保存失败");
@@ -302,7 +302,7 @@ async function findWithSub(ctx) {
             })
         }
     } catch (e) {
-        console.log("报错:" + e);
+        console.log(e);
     }
 
 }

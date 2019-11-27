@@ -12,7 +12,7 @@ describe("测试", () => {
         server.close();
     })
 
-    /*
+    
     it('实时查询接口,公司编码错误', (done) => {
         let param = {
             ShipperCode: "SF",
@@ -246,7 +246,7 @@ describe("测试", () => {
                 }
             })
     });
-*/
+/*
     it('回调函数测试',(done)=>{
         let param = {
             "Data":[{
@@ -281,5 +281,6 @@ describe("测试", () => {
             })
 
     })
+    */
 
 })

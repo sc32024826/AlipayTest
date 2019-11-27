@@ -56,7 +56,7 @@ function encrypt(data, AppKey) {
 
 /**
  * 轨迹信息订阅,每次信息改变时回调修改数据库信息
- * @returns 返回订阅的结果 boolean
+ * @returns {Object} 返回订阅的结果 Success 错误信息 Reason
  */
 async function subscribe(obj) {
 
