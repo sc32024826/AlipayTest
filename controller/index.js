@@ -64,9 +64,11 @@ async function search(ctx) {
             List: data.Traces
         };
 
-        //保存查询结果 TODU: 增加错误时 记录日志
-        await Model.create(data).catch(e=>{
-            log4js.error(e)
+        //保存查询结果
+        await Model.create(data, (err, doc) => {
+            if (err) {
+                log4js.error("存储失败:" + err)
+            }
         })
 
     }
@@ -130,14 +132,18 @@ async function sub(ctx) {
             }
             //订阅成功 更新数据库 
             let update = await Model.updateOne({ ShipperCode, LogisticCode }, { Sub: res.Success });
-            // console.log(update);
+            // console.log(update);  object {n: 0, nModified: 0, ok: 1}
 
             // 如果没有查到相应条目 则新增
-            if (update.nModified === 0) {
+            if (update.n == 0) {
                 console.log("订阅状态:" + res.Success);
 
-                let saver = await Model.create({ ShipperCode: ShipperCode, LogisticCode: LogisticCode, Sub: res.Success })
-                console.log(saver);
+                await Model.create({ ShipperCode: ShipperCode, LogisticCode: LogisticCode, Sub: res.Success }, (err, doc) => {
+                    if (err) {
+                        log4js.error("单号:" + LogisticCode + ",存储失败!");
+                    }
+                })
+
             }
         } else {
             ctx.body = {
@@ -183,15 +189,29 @@ async function callBack(ctx) {
         //根据物流单号 查询数据库 并修改相应的轨迹信息
         let { LogisticCode, ShipperCode, Traces } = element;
         let Reason = "数据更新";
-        let update = await Model.updateOne({ LogiticCode: LogisticCode, ShipperCode: ShipperCode }, { Traces: Traces, Reason: Reason })
-        // console.log(update);  object {n: 0, nModified: 0, ok: 1}
-        if (update.nModified === 0) {
-            //保存数据
-            await Model.create(element).catch(e=>{
-                log4js.error("回调信息保存失败")
-            })
+        await Model.updateOne({ LogisticCode, ShipperCode }, { Traces, Reason }, async (err, raw) => {
+            if (err) {
+                log4js.error(err)
+            } else {
+                log4js.info(raw)
+                //没有匹配的数据  就保存数据
+                if (raw.n == 0) {
+                    //保存数据
+                    await Model.create(element, (err, doc) => {
+                        if (err) {
+                            log4js.error("回调信息保存失败! :" + err)
+                        } else {
+                            log4js.info("单号:" + LogisticCode + ",存储成功!")
+                        }
 
-        }
+                    });
+                }
+                //修改成功
+                if (raw.nModified == 1) {
+                    log4js.info("单号:" + LogisticCode + ",更新成功!")
+                }
+            }
+        })
     });
 }
 /**
@@ -259,11 +279,11 @@ async function findWithSub(ctx) {
                 };
 
                 //更新数据库
-                let updateResult = await Model.updateOne({ ShipperCode, LogisticCode }, { Sub: result.Success })
+                let updateResult = await Model.updateOne({ ShipperCode, LogisticCode }, { Sub: result.Success });
 
                 // console.log(updateResult);
                 if (updateResult.nModified === 0) {
-                    log4js.error("更新数据库失败")
+                    log4js.error("单号" + LogisticCode + "更新数据库失败");
                 }
 
             }
@@ -291,7 +311,7 @@ async function findWithSub(ctx) {
                 result = await express.subscribe(req).Success;
 
             } else {
-                log4js.error("该快递状态不支持订阅，已签收或者出错！");
+                log4js.error("该快递" + LogisticCode + "状态不支持订阅，已签收或者出错！");
             }
             //查询成功 返回相应的值        
             ctx.body = {
@@ -304,7 +324,7 @@ async function findWithSub(ctx) {
             data.Sub = result;
             //保存查询结果 错误时记录日志
             await Model.create(data).catch((e) => {
-                log4js.error("保存失败");
+                log4js.error("该快递" + LogisticCode + "保存失败");
             })
         }
     } catch (e) {
