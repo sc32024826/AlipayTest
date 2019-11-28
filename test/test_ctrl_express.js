@@ -246,9 +246,9 @@ describe("测试", () => {
                 }
             })
     });
-/*
+    /*
     it('回调函数测试',(done)=>{
-        let param = {
+        let data = {
             "Data":[{
                 "LogisticCode":"71758224138204",
                 "ShipperCode":"SF",
@@ -266,6 +266,7 @@ describe("测试", () => {
                 }]
             }]
         }
+        let param = JSON.stringify(data);
 
         request(server)
             .get('/callBack')
@@ -280,7 +281,7 @@ describe("测试", () => {
                 }
             })
 
-    })
-    */
+    })*/
+    
 
 })

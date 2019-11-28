@@ -174,7 +174,7 @@ async function callBack(ctx) {
         Reason: ""
     };
     ctx.body = res;
-    // console.log(data);  Array [Object]
+    // console.log(data);  Array(N) [Object]
 
     await data.forEach(async element => {
         //根据物流单号 查询数据库 并修改相应的轨迹信息
