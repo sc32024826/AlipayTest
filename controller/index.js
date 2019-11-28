@@ -144,7 +144,7 @@ async function sub(ctx) {
         }
     } catch (err) {
         console.log(err);
-        
+
         ctx.body = {
             Err: err,
             Success: false
@@ -157,10 +157,12 @@ async function sub(ctx) {
  * 请求方式POST,"Content-Type": "application/json;charset=utf-8"
  */
 async function callBack(ctx) {
+    // console.log(ctx.method);   POST
 
     //根据快递鸟返回的物流信息物流单号,更新数据库
     //首先获取POST的数据
     let post_params = ctx.request.body.RequestData;
+    // console.log(typeof post_params);  string
 
     // 获取物流单号轨迹的数组
     let data = JSON.parse(post_params).Data;
@@ -172,22 +174,19 @@ async function callBack(ctx) {
         Reason: ""
     };
     ctx.body = res;
+    // console.log(data);  Array [Object]
 
-    await data.forEach(element => {
+    await data.forEach(async element => {
         //根据物流单号 查询数据库 并修改相应的轨迹信息
-        //如果物流单号不存在 则不更新
         let { LogisticCode, ShipperCode, Traces } = element;
         let Reason = "数据更新";
-        Model.updateOne({ LogisticCode: LogisticCode, ShipperCode: ShipperCode }, { Traces: Traces, Reason: Reason }, async (err, raw) => {
-            if (err) {
-                console.log("update failed");
+        let update = await Model.updateOne({ LogiticCode: LogisticCode, ShipperCode: ShipperCode }, { Traces: Traces, Reason: Reason })
+        // console.log(update);  object {n: 0, nModified: 0, ok: 1}
+        if (update.nModified === 0) {
+            //保存数据
+            await Model.create(element)
 
-            } else {
-                console.log("update success");
-
-            }
-        });
-
+        }
     });
 }
 /**
@@ -293,7 +292,7 @@ async function findWithSub(ctx) {
                 List: data.Traces,
                 Sub: result
             };
-            
+
             data.Sub = result;
             //保存查询结果 错误时记录日志
             await Model.create(data).catch((e) => {
