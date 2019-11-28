@@ -12,6 +12,4 @@ router.post('/findWithSub', ctrl.findWithSub)
 //物流回调地址
 router.post('/callBack', ctrl.callBack);
 
-router.get('/callBack', ctrl.callBack);
-
 module.exports = router;

@@ -11,7 +11,6 @@ const json = require('koa-json');
 const bodyparser = require('koa-bodyparser');
 const index = require('./routes/index');
 const onerror = require('koa-onerror');
-
 onerror(app)
 
 // middlewares

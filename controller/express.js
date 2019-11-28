@@ -34,7 +34,7 @@ async function getOrderByJson(jsonObj) {
         url: ReqURL,
         data: PostData
     }).catch(err => {
-        console.log("err:", err);
+        console.log(err);
         throw err;
     });
 

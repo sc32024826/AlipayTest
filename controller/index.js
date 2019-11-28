@@ -4,6 +4,7 @@ const config = require("../config/kuaidiniao");
 const { EBusinessID } = config;
 const moment = require("moment");
 const privacy = require('../utils/privacy')
+const log4js = require('../utils/log4js');
 
 /**
  * 首先 通过ctx 获取 请求参数,查询数据库是否存在物流的相应轨迹信息,若不存在,则订阅
@@ -49,7 +50,7 @@ async function search(ctx) {
             ShipperCode,
             LogisticCode
         }).catch((err) => {
-            console.log("ctrl-index-57" + err);
+            log4js.error(err);
             ctx.body = {
                 Err: err,
                 Success: false
@@ -64,7 +65,9 @@ async function search(ctx) {
         };
 
         //保存查询结果 TODU: 增加错误时 记录日志
-        await Model.create(data)
+        await Model.create(data).catch(e=>{
+            log4js.error(e)
+        })
 
     }
 }
@@ -158,7 +161,7 @@ async function sub(ctx) {
  */
 async function callBack(ctx) {
     // console.log(ctx.method);   POST
-
+    log4js.info("有回调数据进来");
     //根据快递鸟返回的物流信息物流单号,更新数据库
     //首先获取POST的数据
     let post_params = ctx.request.body.RequestData;
@@ -184,7 +187,9 @@ async function callBack(ctx) {
         // console.log(update);  object {n: 0, nModified: 0, ok: 1}
         if (update.nModified === 0) {
             //保存数据
-            await Model.create(element)
+            await Model.create(element).catch(e=>{
+                log4js.error("回调信息保存失败")
+            })
 
         }
     });
@@ -242,7 +247,7 @@ async function findWithSub(ctx) {
                     var result = await express.subscribe(req);
                 } else {
                     result.Success = false;
-                    console.log("该快递状态不支持订阅，已签收或者出错！");
+                    log4js.error("该快递状态不支持订阅，已签收或者出错！");
                 }
 
                 //查询成功 返回相应的值
@@ -257,6 +262,9 @@ async function findWithSub(ctx) {
                 let updateResult = await Model.updateOne({ ShipperCode, LogisticCode }, { Sub: result.Success })
 
                 // console.log(updateResult);
+                if (updateResult.nModified === 0) {
+                    log4js.error("更新数据库失败")
+                }
 
             }
         } else {
@@ -266,7 +274,7 @@ async function findWithSub(ctx) {
                 ShipperCode,
                 LogisticCode
             }).catch((err) => {
-                console.log(err);
+                log4js.error(err);
                 ctx.body = {
                     Err: err,
                     Success: false
@@ -283,7 +291,7 @@ async function findWithSub(ctx) {
                 result = await express.subscribe(req).Success;
 
             } else {
-                console.log("该快递状态不支持订阅，已签收或者出错！");
+                log4js.error("该快递状态不支持订阅，已签收或者出错！");
             }
             //查询成功 返回相应的值        
             ctx.body = {
@@ -296,15 +304,14 @@ async function findWithSub(ctx) {
             data.Sub = result;
             //保存查询结果 错误时记录日志
             await Model.create(data).catch((e) => {
-                console.log("保存失败");
+                log4js.error("保存失败");
             })
         }
     } catch (e) {
-        console.log(e);
+        log4js.error(e);
     }
 
 }
-
 module.exports = {
     search,
     sub,
