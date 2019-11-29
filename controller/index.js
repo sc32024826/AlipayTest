@@ -304,11 +304,14 @@ async function findWithSub(ctx) {
             let req = await privacy.index(ShipperCode, LogisticCode);
             let State = data.State;
 
-            var result = false;
+            var result = {
+                Success: false
+            };
 
             //开始订阅
             if (State != '3' && State != '4') {
-                result = await express.subscribe(req).Success;
+
+                result = await express.subscribe(req);
 
             } else {
                 log4js.error("该快递" + LogisticCode + "状态不支持订阅，已签收或者出错！");
@@ -318,10 +321,11 @@ async function findWithSub(ctx) {
                 Success: true,
                 State: data.State,
                 List: data.Traces,
-                Sub: result
+                Sub: result.Success
             };
+            // console.log(result.Success);
 
-            data.Sub = result;
+            data.Sub = result.Success;
             //保存查询结果 错误时记录日志
             await Model.create(data).catch((e) => {
                 log4js.error("该快递" + LogisticCode + "保存失败");
