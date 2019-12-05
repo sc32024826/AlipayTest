@@ -116,7 +116,8 @@ async function sub(ctx) {
         //查询不到结果 说明未订阅
     }
 
-    let req = await privacy.index(ShipperCode, LogisticCode);
+    // let req = await privacy.index(ShipperCode, LogisticCode);
+    let req = { ShipperCode, LogisticCode };
     try {
         //开始订阅
         var res = await express.subscribe(req);
@@ -261,7 +262,8 @@ async function findWithSub(ctx) {
                 let State = res.State;
 
                 //订阅 并更新数据库
-                let req = await privacy.index(ShipperCode, LogisticCode);
+                // let req = await privacy.index(ShipperCode, LogisticCode);
+                let req = { ShipperCode, LogisticCode };
                 //开始订阅
                 if (State != '3' && State != '4') {
                     var result = await express.subscribe(req);
@@ -301,7 +303,8 @@ async function findWithSub(ctx) {
                 }
                 return
             });
-            let req = await privacy.index(ShipperCode, LogisticCode);
+            // let req = await privacy.index(ShipperCode, LogisticCode);
+            let req = { ShipperCode, LogisticCode };
             let State = data.State;
 
             var result = {
