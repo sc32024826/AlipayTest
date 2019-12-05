@@ -168,7 +168,6 @@ async function sub(ctx) {
  */
 async function callBack(ctx) {
     // console.log(ctx.method);   POST
-    log4js.info("有回调数据进来");
     //根据快递鸟返回的物流信息物流单号,更新数据库
     //首先获取POST的数据
     let post_params = ctx.request.body.RequestData;
@@ -189,10 +188,11 @@ async function callBack(ctx) {
     await data.forEach(async element => {
         //根据物流单号 查询数据库 并修改相应的轨迹信息
         let { LogisticCode, ShipperCode, Traces } = element;
+        log4js.info(Traces);
         let Reason = "数据更新";
         await Model.updateOne({ LogisticCode, ShipperCode }, { Traces, Reason }, async (err, raw) => {
             if (err) {
-                log4js.error(err)
+                log4js.error("更新失败:" + err)
             } else {
                 log4js.info(raw)
                 //没有匹配的数据  就保存数据
@@ -211,6 +211,10 @@ async function callBack(ctx) {
                 if (raw.nModified == 1) {
                     log4js.info("单号:" + LogisticCode + ",更新成功!")
                 }
+                if (raw.nModified == 0) {
+                    log4js.info("单号:" + LogisticCode + ",更新失败!")
+                }
+
             }
         })
     });
