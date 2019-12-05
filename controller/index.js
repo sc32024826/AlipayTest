@@ -172,10 +172,13 @@ async function callBack(ctx) {
     //首先获取POST的数据
     let post_params = ctx.request.body.RequestData;
     // console.log(typeof post_params);  string
-
+    log4js.info("post_params");
+    log4js.info(post_params);
     // 获取物流单号轨迹的数组
     let data = JSON.parse(post_params).Data;
-
+    log4js.info("输出data:");
+    log4js.info(data);
+    log4js.info("输出data完毕");
     let res = {
         EBusinessID: EBusinessID,
         UpdateTime: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
@@ -184,11 +187,13 @@ async function callBack(ctx) {
     };
     ctx.body = res;
     // console.log(data);  Array(N) [Object]
-
+    // if (typeof data == "Array") {
     await data.forEach(async element => {
         //根据物流单号 查询数据库 并修改相应的轨迹信息
         let { LogisticCode, ShipperCode, Traces } = element;
-        log4js.info(Traces);
+        // log4js.info(Traces);  //undefined
+        // console.log(Traces);
+
         let Reason = "数据更新";
         await Model.updateOne({ LogisticCode, ShipperCode }, { Traces, Reason }, async (err, raw) => {
             if (err) {
@@ -218,6 +223,8 @@ async function callBack(ctx) {
             }
         })
     });
+    // }
+
 }
 /**
  * 查询 并 订阅
@@ -349,3 +356,4 @@ module.exports = {
     callBack,
     findWithSub
 };
+
