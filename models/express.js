@@ -8,7 +8,7 @@ const expressSchema = new Schema({
     Traces: Array,
     OrderCode: String,
     Success: Boolean,
-    State: Number,
+    State: String,
     EBusinessID: String,
     Reason: String,
     Sub: {                  //是否已经订阅

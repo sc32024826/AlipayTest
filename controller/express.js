@@ -1,92 +1,63 @@
+const config = require("../config/index");
+const { AppKey, ReqURL, EBusinessID, imethod } = config;
+const rp = require("request-promise");
+const utility = require('utility')
 const axios = require("axios");
-const crypto = require("crypto");
-const querystring = require("querystring");
-const config = require("../config/kuaidiniao");
-const { AppKey, ReqURL, EBusinessID } = config;
 
 
 /**
  * 即时查询
- * 需要参数
- * OrderCode 订单编号,不可重复,自定义
- * ShipperCode快递公司编码 即时查询只支持三家公司 圆通YTO 申通STO 中通ZTO
- * LogisticCode快递单号
- * @param jsonObj {Object} 必须参数:ShipperCode-快递公司编码,LogisticCode-快递单号
- * @returns {Object} data.success true-有轨迹 false-无轨迹
+ * @param param waybill_no:快递单号
+ * @param param exp_company_code:快递公司编码
+ * @param param result_sort:排序规则,0降序,1升序
+ * @returns res.code int 0:成功  string 201101:查询暂无记录 201102:请求参数错误 201103:不支持的快递品牌
  */
-async function getOrderByJson(jsonObj) {
-    let requestData = JSON.stringify(jsonObj);
-    let DataSign = encrypt(requestData, AppKey);
-    // console.log("签名" + DataSign);
-    let PostData = querystring.stringify({
-        RequestData: requestData,
-        EBusinessID,
-        RequestType: 1002,
-        DataSign,
-        DataType: "2"
-    });
-    // console.log("post数据" + PostData);
-    const res = await axios({
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
-        },
+async function getTraces(waybill_no, exp_company_code, result_sort) {
+    let jsondate = {
+        waybill_no: waybill_no,
+        exp_company_code: exp_company_code,
+        result_sort: result_sort
+    }
+    let reqData = JSON.stringify(jsondate)
+    let ts = Date.now();
+    let sign = encrypt(ts);
+    let req = {
+        app_id: EBusinessID,
+        method: imethod,
+        ts: ts,
+        data: reqData,
+        sign: sign
+    };
+
+    var options = {
         method: "POST",
         url: ReqURL,
-        data: PostData
-    }).catch(err => {
-        console.log(err);
-        throw err;
-    });
+        headers: {
+            "cache-control": "no-cache",
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+        },
+        form: req
 
-    // console.log(res.data);
+    };
 
-    return res.data;
+    let res = await rp(options);
+
+    if (res) {
+        return res
+    } 
 }
 
 /**
- * 电商sign 签名生成
- * @param data 内容
- * @param AppKey AppKey
+ * 电商sign 签名生成 按照规则(md5(app_id + method + ts + api_key))生成的验证合法性签名
+ * ts:当前请求的时间戳
+ * app_id: EBusinessID 即用户id
+ * @param ts 当前请求的时间戳
  * @return string
  */
-function encrypt(data, AppKey) {
-    let md5 = crypto.createHash("md5");
-    return Buffer.from(md5.update(data + AppKey).digest("hex")).toString("base64");
-}
-
-/**
- * 轨迹信息订阅,每次信息改变时回调修改数据库信息
- * @returns {Object} 返回订阅的结果 Success 错误信息 Reason
- */
-async function subscribe(obj) {
-
-    let requestData = JSON.stringify(obj);
-    let DataSign = encrypt(requestData, AppKey);
-    // console.log("签名" + DataSign);
-    let PostData = querystring.stringify({
-        RequestData: requestData,
-        EBusinessID,
-        RequestType: 1008,
-        DataSign,
-        DataType: "2"
-    });
-    // console.log("post数据" + PostData);
-    const res = await axios({
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
-        },
-        method: "POST",
-        url: ReqURL,
-        data: PostData
-    }).catch(err => {
-        console.log(err);
-        throw err;
-    });
-    console.log(res.data);
-    return res.data; //返回订阅结果
+function encrypt(ts) {
+    return utility.md5(EBusinessID + imethod + ts + AppKey);
 }
 
 module.exports = {
-    getOrderByJson,
-    subscribe
+    getTraces
 };

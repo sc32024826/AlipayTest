@@ -26,7 +26,10 @@
     "log4js": "^6.1.0",
     "moment": "^2.24.0",
     "mongoose": "^5.7.8",
-    "pm2-intercom": "^1.0.0"
+    "pm2-intercom": "^1.0.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.5",
+    "utility": "^1.16.3"
   },
   "devDependencies": {
     "mocha": "^6.2.2",
