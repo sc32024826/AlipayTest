@@ -8,10 +8,13 @@ const expressSchema = new Schema({
     Traces: Array,
     OrderCode: String,
     Success: Boolean,
-    State: Number,
+    State: String,
     EBusinessID: String,
-    Reason: String
-
+    Reason: String,
+    Sub: {                  //是否已经订阅
+        type: Boolean,
+        default: false
+    }
 }, { versionKey: false })
 
 const express = mongoose.model('express', expressSchema, 'express') //第三个变量 为固定集合名 防止出现由mongodb 自动在集合名加S 导致的问题

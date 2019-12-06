@@ -1,22 +1,20 @@
 //数据库
-const mongoose = require('mongoose')
-mongoose.Promise = require('bluebird')
+const mongoose = require('mongoose');
+mongoose.Promise = require('bluebird');
 mongoose.connect('mongodb://localhost:27017/local', {
   useNewUrlParser: true,
   useUnifiedTopology: true
-})
-const Koa = require('koa')
-const app = new Koa()
-const json = require('koa-json')
-const bodyparser = require('koa-bodyparser')
-const index = require('./routes/index')
-const onerror = require('koa-onerror')
-const logger = require('koa-logger')
-
+});
+const Koa = require('koa');
+const app = new Koa();
+const json = require('koa-json');
+const bodyparser = require('koa-bodyparser');
+const index = require('./routes/index');
+const onerror = require('koa-onerror');
 onerror(app)
 
 // middlewares
-app.use(logger())
+// app.use(logger())
 app.use(bodyparser({
   enableTypes: ['json', 'form', 'text']
 }))
