@@ -188,39 +188,45 @@ async function callBack(ctx) {
     // console.log(data);  Array(N) [Object]
     await data.forEach(async element => {
         //根据物流单号 查询数据库 并修改相应的轨迹信息
-        let { LogisticCode, ShipperCode, Traces } = element;
+        let { LogisticCode, ShipperCode, Traces, Success } = element;
         // log4js.info(Traces);  //undefined
 
-        let Reason = "数据更新";
-        await Model.updateOne({ LogisticCode, ShipperCode }, { Traces, Reason }, async (err, raw) => {
-            if (err) {
-                log4js.error("更新失败:" + err)
-            } else {
-                log4js.info("查找结果");
-                log4js.info(raw);
-                //没有匹配的数据  就保存数据
-                if (raw.n == 0) {
-                    //保存数据
-                    await Model.create(element, (err, doc) => {
-                        if (err) {
-                            log4js.error("回调信息保存失败! :" + err)
-                        } else {
-                            log4js.info("单号:" + LogisticCode + ",存储成功!")
-                        }
+        //当state = 0 时,轨迹信息返回为null 此时 不更新
+        if (Success == true) {
+            let Reason = "数据更新";
+            await Model.updateOne({ LogisticCode, ShipperCode }, { Traces, Reason }, async (err, raw) => {
+                if (err) {
+                    log4js.error("更新失败:" + err)
+                } else {
+                    log4js.info("查找结果");
+                    log4js.info(raw);
+                    //没有匹配的数据  就保存数据
+                    if (raw.n == 0) {
+                        //保存数据
+                        await Model.create(element, (err, doc) => {
+                            if (err) {
+                                log4js.error("回调信息保存失败! :" + err)
+                            } else {
+                                log4js.info("单号:" + LogisticCode + ",存储成功!")
+                            }
 
-                    });
-                    return
-                }
-                //修改成功
-                if (raw.nModified == 1) {
-                    log4js.info("单号:" + LogisticCode + ",更新成功!")
-                }
-                if (raw.nModified == 0) {
-                    log4js.info("单号:" + LogisticCode + ",更新失败,次数失败可以忽略,造成原因可能是数据相同")
-                }
+                        });
+                        return
+                    }
+                    //修改成功
+                    if (raw.nModified == 1) {
+                        log4js.info("单号:" + LogisticCode + ",更新成功!")
+                    }
+                    if (raw.nModified == 0) {
+                        log4js.info("单号:" + LogisticCode + ",更新失败,次数失败可以忽略,造成原因可能是数据相同")
+                    }
 
-            }
-        })
+                }
+            })
+        } else {
+            log4js.info("单号:" + LogisticCode + "返回数据有问题,跳过更新!")
+        }
+
     });
 }
 /**
