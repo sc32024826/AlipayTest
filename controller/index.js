@@ -14,7 +14,7 @@ async function search(ctx) {
 
     const req = ctx.request.body;
     let { ShipperCode, LogisticCode } = req;
-
+    ShipperCode = ShipperCode.toUpperCase();
     if (!ShipperCode || !LogisticCode) {
         ctx.body = {
             Err: "400, 参数错误"
@@ -24,7 +24,7 @@ async function search(ctx) {
     //圆通 中通 申通 百世汇通 四家快递公司
     const company = ['YTO', 'STO', 'ZTO'];
 
-    if (!company.includes(ShipperCode.toUpperCase())) {
+    if (!company.includes(ShipperCode)) {
         ctx.body = {
             Err: "目前只支持三家公司 圆通YTO 申通STO 中通ZTO"
         };
@@ -230,6 +230,8 @@ async function callBack(ctx) {
 async function findWithSub(ctx) {
     const req = ctx.request.body;
     let { ShipperCode, LogisticCode } = req;
+    ShipperCode = ShipperCode.toUpperCase();
+
     if (!ShipperCode || !LogisticCode) {
         ctx.body = {
             Err: "400, 参数错误"
@@ -239,7 +241,7 @@ async function findWithSub(ctx) {
     //圆通 中通 申通 百世汇通 四家快递公司
     const company = ['YTO', 'STO', 'ZTO'];
 
-    if (!company.includes(ShipperCode.toUpperCase())) {
+    if (!company.includes(ShipperCode)) {
         // console.log('只支持三家公司 圆通YTO 申通STO 中通ZTO');
         ctx.body = {
             Err: "目前只支持三家公司 圆通YTO 申通STO 中通ZTO"
