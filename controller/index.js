@@ -83,6 +83,8 @@ async function sub(ctx) {
 
     //请求必须参数验证
     let { ShipperCode, LogisticCode, State } = ctx.request.body;
+    ShipperCode = ShipperCode.toUpperCase();
+
     if (State === '3' || State === '4') {
         ctx.body = {
             Err: "该快递状态不支持订阅，已签收或者出错！",
@@ -93,7 +95,7 @@ async function sub(ctx) {
     //圆通 中通 申通 百世汇通 四家快递公司
     const company = ['YTO', 'STO', 'ZTO', 'HTKY'];
 
-    if (!company.includes(ShipperCode.toUpperCase())) {
+    if (!company.includes(ShipperCode)) {
         ctx.body = {
             Err: "目前只支持四家公司订阅 圆通YTO 申通STO 中通ZTO 百世汇通HTKY"
         };
@@ -172,13 +174,10 @@ async function callBack(ctx) {
     //首先获取POST的数据
     let post_params = ctx.request.body.RequestData;
     // console.log(typeof post_params);  string
-    log4js.info("post_params");
-    log4js.info(post_params);
+
     // 获取物流单号轨迹的数组
     let data = JSON.parse(post_params).Data;
-    log4js.info("输出data:");
     log4js.info(data);
-    log4js.info("输出data完毕");
     let res = {
         EBusinessID: EBusinessID,
         UpdateTime: moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
@@ -187,19 +186,18 @@ async function callBack(ctx) {
     };
     ctx.body = res;
     // console.log(data);  Array(N) [Object]
-    // if (typeof data == "Array") {
     await data.forEach(async element => {
         //根据物流单号 查询数据库 并修改相应的轨迹信息
         let { LogisticCode, ShipperCode, Traces } = element;
         // log4js.info(Traces);  //undefined
-        // console.log(Traces);
 
         let Reason = "数据更新";
         await Model.updateOne({ LogisticCode, ShipperCode }, { Traces, Reason }, async (err, raw) => {
             if (err) {
                 log4js.error("更新失败:" + err)
             } else {
-                log4js.info(raw)
+                log4js.info("查找结果");
+                log4js.info(raw);
                 //没有匹配的数据  就保存数据
                 if (raw.n == 0) {
                     //保存数据
@@ -211,20 +209,19 @@ async function callBack(ctx) {
                         }
 
                     });
+                    return
                 }
                 //修改成功
                 if (raw.nModified == 1) {
                     log4js.info("单号:" + LogisticCode + ",更新成功!")
                 }
                 if (raw.nModified == 0) {
-                    log4js.info("单号:" + LogisticCode + ",更新失败!")
+                    log4js.info("单号:" + LogisticCode + ",更新失败,次数失败可以忽略,造成原因可能是数据相同")
                 }
 
             }
         })
     });
-    // }
-
 }
 /**
  * 查询 并 订阅
