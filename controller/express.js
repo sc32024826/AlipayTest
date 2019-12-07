@@ -44,7 +44,9 @@ async function getTraces(waybill_no, exp_company_code, result_sort) {
 
     if (res) {
         return res
-    } 
+    } else {
+        throw new Error("http request failed!")
+    }
 }
 
 /**

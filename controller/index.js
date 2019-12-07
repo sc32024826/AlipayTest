@@ -10,13 +10,13 @@ async function search(ctx) {
 
     const req = ctx.request.body;
     let { exp_company_code, waybill_no } = req;
-    exp_company_code = exp_company_code.toLowerCase();
     if (!exp_company_code || !waybill_no) {
         ctx.body = {
             Err: "400, 参数错误"
         };
         return
     }
+    exp_company_code = exp_company_code.toLowerCase();
 
     //首先根据物流单号和公司编号 查询数据库，是否存在相应内容
     try {
@@ -60,6 +60,11 @@ async function search(ctx) {
                     }
                 })
             })
+        } else {
+            ctx.body = {
+                Code: res.code,
+                Msg: res.msg
+            }
         }
     }
 }
