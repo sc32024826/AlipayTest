@@ -98,147 +98,22 @@
         </tbody>
     </table>
     <p>示例:<br>正常响应: </p>
-    <pre class="prettyprint linenums prettyprinted">
-        <ol class="linenums">
-            <li class="L0">
-                <code class="lang-javascript">
-                    <span class="pln"> </span>
-                    <span class="pun">{</span>
-                </code>
-            </li>
-            <li class="L1">
-                <code class="lang-javascript">
-                    <span class="pln"> </span>
-                    <span class="typ">Success</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="kwd">true</span>
-                    <span class="pun">,</span>
-                </code>
-            </li>
-            <li class="L2">
-                <code class="lang-javascript">
-                    <span class="pln"> </span>
-                    <span class="typ">List</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="pun">[{</span>
-                </code>
-            </li>
-            <li class="L3">
-                <code class="lang-javascript">
-                    <span class="pln"> no</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="str">'777005949070187'</span>
-                    <span class="pun">,</span>
-                </code>
-            </li>
-            <li class="L4">
-                <code class="lang-javascript">
-                    <span class="pln"> brand</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="str">'sto'</span>
-                    <span class="pun">,</span>
-                </code>
-            </li>
-            <li class="L5">
-                <code class="lang-javascript">
-                    <span class="pln"> status</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="str">'sending'</span>
-                    <span class="pun">,</span>
-                </code>
-            </li>
-            <li class="L6">
-                <code class="lang-javascript">
-                    <span class="pln"> data</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="pun">[</span>
-                    <span class="typ">Array</span>
-                    <span class="pun">],</span>
-                </code>
-            </li>
-            <li class="L7">
-                <code class="lang-javascript">
-                    <span class="pln"> order</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="str">'desc'</span>
-                    <span class="pun">,</span>
-                </code>
-            </li>
-            <li class="L8">
-                <code class="lang-javascript">
-                    <span class="pln"> res</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="lit">0</span>
-                </code>
-            </li>
-            <li class="L9">
-                <code class="lang-javascript">
-                    <span class="pln"> </span>
-                    <span class="pun">}]</span>
-                </code>
-            </li>
-            <li class="L0">
-                <code class="lang-javascript">
-                    <span class="pln"> </span>
-                    <span class="pun">}</span>
-                </code>
-            </li>
-        </ol>
-    </pre>
+    ```javascript
+    {
+        Success:true,
+        List:[{
+            no:'777005949070187',
+            brand:'sto',
+            status:'sending',
+            data:[Array],
+            order:'desc',
+            res:0
+         }]
+    }
     <p>异常响应:</p>
-    <pre class="prettyprint linenums prettyprinted">
-        <ol class="linenums">
-            <li class="L0">
-                <code class="lang-javascript">
-                    <span class="pln"> </span>
-                    <span class="pun">{</span>
-                </code>
-            </li>
-            <li class="L1">
-                <code class="lang-javascript">
-                    <span class="pln"> </span>
-                    <span class="str">"code"</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="str">"错误代码"</span>
-                    <span class="pun">,</span>
-                </code>
-            </li>
-            <li class="L2">
-                <code class="lang-javascript">
-                    <span class="pln"> </span>
-                    <span class="str">"msg"</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="str">"错误信息"</span>
-                    <span class="pun">,</span>
-                </code>
-            </li>
-            <li class="L3">
-                <code class="lang-javascript">
-                    <span class="pln"> </span>
-                    <span class="str">"data"</span>
-                    <span class="pun">:</span>
-                    <span class="pln"> </span>
-                    <span class="pun">{}</span>
-                </code>
-            </li>
-            <li class="L4">
-                <code class="lang-javascript">
-                    <span class="pln"> </span>
-                    <span class="pun">}</span>
-                </code>
-            </li>
-        </ol>
-    </pre>
+
 </body>
 
 </html>
+
+```
