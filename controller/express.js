@@ -1,4 +1,4 @@
-const config = require("../config/index");
+const config = require("/home/appkey/index.js");
 const { AppKey, ReqURL, EBusinessID, imethod } = config;
 const rp = require("request-promise");
 const utility = require('utility')

@@ -10,3 +10,4 @@ vcs.xml
 /.idea/
 /sc/
 /.nyc_output/
+/config/index.js
