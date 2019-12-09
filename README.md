@@ -1,6 +1,9 @@
 
-#示例:  
-##正常响应:  
+示例:
+=
+正常响应:
+-
+
 ```javascript
 {
     Success:true,
@@ -12,5 +15,14 @@
         order:'desc',
         res:0
      }]
+}
+```
+异常响应
+-
+```javascript
+{
+    "code":"错误代码",
+    "msg":"错误信息",
+    "data":{}
 }
 ```
