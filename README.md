@@ -97,7 +97,14 @@
             </tr>
         </tbody>
     </table>
-    <p>示例:<br>正常响应: </p>
+
+    <p>异常响应:</p>
+
+</body>
+
+</html>
+    ###示例:  
+    ###正常响应:  
     ```javascript
     {
         Success:true,
@@ -110,10 +117,4 @@
             res:0
          }]
     }
-    <p>异常响应:</p>
-
-</body>
-
-</html>
-
-```
+    ```
